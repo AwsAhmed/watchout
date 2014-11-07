@@ -6,27 +6,40 @@ var svg = d3.select("body").append("svg")
   .attr("width", width)
   .attr("height", height);
 
-var enemiesNum = 15;
-var enemiesArr = [];
+var setPosition = function(){
+  var enemiesNum = 15;
+  var enemiesArr = [];
+  for (var i=0; i < enemiesNum; i++){
+    var x = Math.random()*width;
+    var y = Math.random()*height;
+    enemiesArr.push({id : i, x : x, y : y});
+  }
+  return enemiesArr;
+};
 
-for (var i=0; i < enemiesNum; i++){
-  var x = Math.random()*width;
-  var y = Math.random()*height;
+var updatePosition = function(){
+  d3.select("svg").selectAll("circle")
+    .data(setPosition())
+    .enter()
+    .append('svg:circle')
+    .attr('cx', function(d){
+      return d.x;
+    })
+    .attr('cy', function(d){
+      return d.y;
+    })
+    .attr('r', 10);
 
-  enemiesArr.push({id : i, x : x, y : y});
+    d3.select("svg").selectAll("circle")
+    .data(setPosition())
+    .transition().duration(500)
+    .attr('cx', function(d){
+      return d.x;
+    })
+    .attr('cy', function(d){
+      return d.y;
+    })
+    .attr('r', 10);
+};
 
-}
-
-
-svg.selectAll("body")
-  .data(enemiesArr)
-  .enter()
-  .append('svg:circle')
-  .attr('cx', function(d){
-    return d.x;
-  })
-  .attr('cy', function(d){
-    return d.y;
-  })
-  .attr('r', 10);
-
+setInterval(updatePosition, 1000);
