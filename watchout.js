@@ -2,7 +2,7 @@
 
 var width = 1000,
     height = 600,
-    radius = 10;
+    radius = 20;
 var score = 0;
 var high = 0;
 var collision = 0;
@@ -21,7 +21,10 @@ var collisionCount = d3.select('.collisions')
 
 var svg = d3.select("body").append("svg")
   .attr("width", width)
-  .attr("height", height);
+  .attr("height", height)
+  .attr('xmlns', "http://www.w3.org/2000/svg")
+  .attr('xlink', "http://www.w3.org/1999/xlink");
+
 
 var setPosition = function(){
   var enemiesArr = [];
@@ -53,8 +56,8 @@ var onCollision = function(){
 };
 
 var checkCollision = function(enemy,onCollision){
-  var ex = parseFloat(enemy.attr('cx'));
-  var ey = parseFloat(enemy.attr('cy'));
+  var ex = parseFloat(enemy.attr('x'));
+  var ey = parseFloat(enemy.attr('y'));
   var player = d3.selectAll('.player');
   var px = parseFloat(player.attr('cx'));
   var py = parseFloat(player.attr('cy'));
@@ -66,8 +69,8 @@ var checkCollision = function(enemy,onCollision){
 
 var tweenWithCollisionDetection = function(givenData){
   var enemy = d3.select(this);
-  var startX = parseFloat(enemy.attr('cx'));
-  var startY = parseFloat(enemy.attr('cy'));
+  var startX = parseFloat(enemy.attr('x'));
+  var startY = parseFloat(enemy.attr('y'));
   var endX = givenData.x;
   var endY = givenData.y;
 
@@ -77,26 +80,30 @@ var tweenWithCollisionDetection = function(givenData){
     var nextY = startY + (endY - startY)*t;
 
     //console.log("startX" + startX + " endX" + endX + "t" + t + "nextX" + nextX);
-     enemy.attr('cx',nextX)
-          .attr('cy',nextY);
+     enemy.attr('x',nextX)
+          .attr('y',nextY);
   };
 };
 
 var updatePosition = function(){
-  d3.select("svg").selectAll("circle")
+  d3.select("svg").selectAll("image")
     .data(setPosition(),function(d){return d.id;})
     .enter()
-    .append('svg:circle')
+    .append('svg:image')
     .attr('class','enemy')
-    .attr('cx', function(d){
+    .attr('x', function(d){
       return d.x;
     })
-    .attr('cy', function(d){
+    .attr('y', function(d){
       return d.y;
     })
-    .attr('r', radius);
+    .attr('r', radius)
+    .attr('xlink:href', 'shuriken.png')
+    .attr('height',radius +'px')
+    .attr('width', radius + 'px');
 
-    d3.select("svg").selectAll("circle")
+
+    d3.select("svg").selectAll("image")
     .data(setPosition(),function(d){return d.id;})
     .transition()
     .duration(duration)
@@ -117,7 +124,7 @@ d3.select("svg").selectAll("circle")
     })
   .attr('r', radius)
   .call(drag);
-
+//updatePosition();
 setInterval(updatePosition, speed);
 
 setInterval(function(){
