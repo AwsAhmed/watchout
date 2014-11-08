@@ -4,12 +4,24 @@ var width = 1000,
     height = 600,
     radius = 10;
 var score = 0;
+var high = 0;
+var collision = 0;
+var enemiesNum = 15;
+var speed = 2000;
+var duration = 1000;
+
+var currentScore = d3.select('.current')
+  .selectAll('span');
+
+var highScore = d3.select('.high')
+  .selectAll('span');
+
+var collisionCount = d3.select('.collisions')
+  .selectAll('span');
 
 var svg = d3.select("body").append("svg")
   .attr("width", width)
   .attr("height", height);
-
-var enemiesNum = 15;
 
 var setPosition = function(){
   var enemiesArr = [];
@@ -22,11 +34,22 @@ var setPosition = function(){
 };
 
 var drag = d3.behavior.drag().on('drag', function(d){
-  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+  var dX = d3.event.x > (width-radius) ? (width - radius): d3.event.x;
+  var dY = d3.event.y > (height-radius) ? (height - radius) : d3.event.y;
+  dX = dX < radius ? radius : dX;
+  dY = dY <  radius ? radius :dY;
+  d3.select(this).attr("cx", d.x = dX).attr("cy", d.y = dY);
 });
 
-var onCollision =function(){
+var onCollision = function(){
+  if (score > high){
+    high = score;
+    highScore.text(high);
+  }
+  collision++;
+  collisionCount.text(collision);
   score = 0;
+
 };
 
 var checkCollision = function(enemy,onCollision){
@@ -38,9 +61,7 @@ var checkCollision = function(enemy,onCollision){
   var distanceSq = Math.pow(ex-px,2) + Math.pow(ey-py,2);
   var distance = Math.sqrt(distanceSq);
   if(distance<20)
-    console.log("hit");
-  //console.log(distance);
-  //onCollision();
+    onCollision();
 };
 
 var tweenWithCollisionDetection = function(givenData){
@@ -78,11 +99,9 @@ var updatePosition = function(){
     d3.select("svg").selectAll("circle")
     .data(setPosition(),function(d){return d.id;})
     .transition()
-    .duration(500)
+    .duration(duration)
     .tween('custom',tweenWithCollisionDetection);
 };
-
-setInterval(updatePosition, 1000);
 
 d3.select("svg").selectAll("circle")
   .data([{id: enemiesNum + 1, x: width / 2, y: height / 2 }])
@@ -99,6 +118,12 @@ d3.select("svg").selectAll("circle")
   .attr('r', radius)
   .call(drag);
 
+setInterval(updatePosition, speed);
+
+setInterval(function(){
+  score++;
+  currentScore.text(score);
+},1);
 
 
 
