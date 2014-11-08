@@ -3,8 +3,13 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+body{
+  background-image: url("background.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
 
-@-webkit-keyframes rotate {
+@-webkit-keyframes rotateRight {
   from {
     -webkit-transform: rotate(0deg);
   }
@@ -13,13 +18,32 @@ Feel free to use it if you like. */
   }
 }
 
+@-webkit-keyframes rotateLeft {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+  to {
+    -webkit-transform: rotate(-360deg);
+  }
+}
+
 .enemy
 {
-    -webkit-animation-name:             rotate;
     -webkit-animation-duration:         0.5s;
     -webkit-animation-iteration-count:  infinite;
     -webkit-animation-timing-function: linear;
     -webkit-transform-origin-x: initial;
     -webkit-transform-origin-y: initial;
     -webkit-transform-origin-z: initial;
+}
+
+
+.enemy.left
+{
+    -webkit-animation-name:             rotateLeft;
+
+}
+.enemy.right
+{
+    -webkit-animation-name:             rotateRight;
 }
