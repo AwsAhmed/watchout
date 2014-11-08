@@ -3,6 +3,11 @@
 /* Note: an asteroid image is included in this repo.
 Feel free to use it if you like. */
 
+div{
+  color: white;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
 body{
   background-image: url("background.png");
   background-size: cover;
