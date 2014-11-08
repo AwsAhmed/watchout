@@ -10,6 +10,7 @@ var speed = 2000;
 var duration = 500;
 var playerSize = 50;
 var enemySize = 20;
+var gameOver = false;
 
 var currentScore = d3.select('.current')
   .selectAll('span');
@@ -45,8 +46,34 @@ var onCollision = function(){
   }
   collision++;
   collisionCount.text(collision);
-  score = 0;
-
+  if(score>100){
+    score = 0;
+    gameOver = true;
+    var player = d3.selectAll('.player');
+    var px = parseFloat(player.attr('x')) + (playerSize/2);
+    var py = parseFloat(player.attr('y')) + (playerSize/2);
+    d3.select("svg").selectAll("circle")
+      .data([{id: enemiesNum + 2}])
+      .enter()
+      .append('svg:circle')
+      .attr('cx',px)
+      .attr('cy',py)
+      .attr('r',playerSize*5 + 'px')
+      .attr('fill', 'red')
+      .style('opacity',.5)
+      .transition()
+      .duration(400)
+      .style('opacity',.8)
+      .attr('r','0px');
+    player.attr("height", "0px")
+      .attr("width", "0px");
+  }
+  setTimeout(function(){
+    gameOver = false;
+    player.attr("height", playerSize + "px")
+      .attr("width", playerSize + "px");
+    d3.select("svg").selectAll("circle").data([]).exit().remove();}
+      ,1000);
 };
 
 var checkCollisionFromEnemy = function(enemy){
@@ -80,7 +107,8 @@ var drag = d3.behavior.drag().on('drag', function(d){
   dX = dX < playerSize ? playerSize : dX;
   dY = dY <  playerSize ? playerSize :dY;
   d3.selectAll('.enemy').each(function(en){checkCollisionFromPlayer(en,dX,dY);});
-  d3.select(this).attr("x", d.x = dX).attr("y", d.y = dY);
+  if(!gameOver)
+    d3.select(this).attr("x", d.x = dX).attr("y", d.y = dY);
 });
 
 var tweenWithCollisionDetection = function(givenData){
@@ -102,6 +130,7 @@ var tweenWithCollisionDetection = function(givenData){
 };
 var enemySelection;
 var updatePosition = function(){
+
   enemySelection = d3.select("svg").selectAll("image")
     .data(setPosition(),function(d){return d.id;})
     .enter()
@@ -119,12 +148,13 @@ var updatePosition = function(){
     .attr('height',enemySize +'px')
     .attr('width', enemySize + 'px');
 
-
-    enemySelection = d3.select("svg").selectAll("image")
-    .data(setPosition(),function(d){return d.id;})
-    .transition()
-    .duration(duration)
-    .tween('custom',tweenWithCollisionDetection);
+    if(!gameOver){
+      enemySelection = d3.select("svg").selectAll("image")
+      .data(setPosition(),function(d){return d.id;})
+      .transition()
+      .duration(duration)
+      .tween('custom',tweenWithCollisionDetection);
+    }
 };
 
 d3.select("svg").selectAll("image")
@@ -146,8 +176,10 @@ updatePosition();
 setInterval(updatePosition, speed);
 
 setInterval(function(){
-  score++;
-  currentScore.text(score);
+  if(!gameOver){
+    score++;
+    currentScore.text(score);
+  }
 },1);
 
 
