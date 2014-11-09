@@ -2,31 +2,28 @@
 
 var width = 1000,
     height = 600;
+var svgW = 1500;
 var score = 0;
 var high = 0;
 var collision = 0;
 var enemiesNum = 15;
 var speed = 2000;
-var duration = 500;
+var duration = 1000;
 var playerSize = 50;
 var enemySize = 20;
 var gameOver = false;
+var ashHandX = 1250;
+var ashHandY = 350;
 
-var currentScore = d3.select('.current')
-  .selectAll('span');
-
-var highScore = d3.select('.high')
-  .selectAll('span');
-
-var collisionCount = d3.select('.collisions')
-  .selectAll('span');
+var currentScore = d3.select('.current span');
+var highScore = d3.select('.high span');
+var collisionCount = d3.select('.collisions span');
 
 var svg = d3.select("body").append("svg")
-  .attr("width", width)
+  .attr("width", svgW)
   .attr("height", height)
   .attr('xmlns', "http://www.w3.org/2000/svg")
   .attr('xlink', "http://www.w3.org/1999/xlink");
-
 
 var setPosition = function(){
   var enemiesArr = [];
@@ -40,10 +37,9 @@ var setPosition = function(){
 };
 
 var onCollision = function(){
-  if (score > high){
-    high = score;
-    highScore.text(high);
-  }
+  high = Math.max(high,score);
+  highScore.text(high);
+
   collision++;
   collisionCount.text(collision);
   if(score>100){
@@ -65,15 +61,25 @@ var onCollision = function(){
       .duration(400)
       .style('opacity',.8)
       .attr('r','0px');
+
     player.attr("height", "0px")
       .attr("width", "0px");
+
+    setTimeout(function(){
+      gameOver = false;
+      player.attr("height", playerSize + "px")
+        .attr("width", playerSize + "px");
+      d3.select("svg").selectAll("circle").data([]).exit().remove();},500);
   }
-  setTimeout(function(){
-    gameOver = false;
-    player.attr("height", playerSize + "px")
-      .attr("width", playerSize + "px");
-    d3.select("svg").selectAll("circle").data([]).exit().remove();}
-      ,1000);
+
+};
+
+var collisionMath = function(ex,ey,px,py){
+  var distanceSq = Math.pow(ex-px,2) + Math.pow(ey-py,2);
+  var distance = Math.sqrt(distanceSq);
+  if(distance<((playerSize + enemySize)/2)){
+    onCollision();
+  }
 };
 
 var checkCollisionFromEnemy = function(enemy){
@@ -91,14 +97,6 @@ var checkCollisionFromPlayer = function(enemy,px,py){
   px = px + (playerSize/2);
   py = py + (playerSize/2);
   collisionMath(ex,ey,px,py);
-};
-
-var collisionMath = function(ex,ey,px,py){
-  var distanceSq = Math.pow(ex-px,2) + Math.pow(ey-py,2);
-  var distance = Math.sqrt(distanceSq);
-  if(distance<((playerSize + enemySize)/2)){
-    onCollision();
-  }
 };
 
 var drag = d3.behavior.drag().on('drag', function(d){
@@ -123,33 +121,27 @@ var tweenWithCollisionDetection = function(givenData){
     var nextX = startX + (endX - startX)*t;
     var nextY = startY + (endY - startY)*t;
 
-    //console.log("startX" + startX + " endX" + endX + "t" + t + "nextX" + nextX);
      enemy.attr('x',nextX)
           .attr('y',nextY);
   };
 };
-var enemySelection;
-var updatePosition = function(){
 
-  enemySelection = d3.select("svg").selectAll("image")
+var updatePosition = function(){
+  d3.select("svg").selectAll("image")
     .data(setPosition(),function(d){return d.id;})
     .enter()
     .append('svg:image')
     .attr('class', function(d){
       return  "enemy " + d.spin;
     })
-    .attr('x', function(d){
-      return d.x;
-    })
-    .attr('y', function(d){
-      return d.y;
-    })
+    .attr('x', ashHandX)
+    .attr('y', ashHandY)
     .attr('xlink:href', 'pokeball.png')
     .attr('height',enemySize +'px')
     .attr('width', enemySize + 'px');
 
     if(!gameOver){
-      enemySelection = d3.select("svg").selectAll("image")
+      d3.select("svg").selectAll("image")
       .data(setPosition(),function(d){return d.id;})
       .transition()
       .duration(duration)
@@ -181,51 +173,3 @@ setInterval(function(){
     currentScore.text(score);
   }
 },1);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
